@@ -23,7 +23,7 @@ function Logo() {
 
 function Form() {
   function handleSubmit(e) {
-    e.preventDefault(); // Prevents page reloading upon form submition.
+    e.preventDefault(); // Prevents page reloading upon form submission.
   }
 
   return (
