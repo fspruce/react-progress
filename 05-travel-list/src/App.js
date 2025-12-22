@@ -1,5 +1,7 @@
 // Emojis can be used with windows shortcut: windows + .
 
+import { useState } from "react";
+
 const initialItems = [
   { id: 1, description: "Passports", quantity: 2, packed: false },
   { id: 2, description: "Socks", quantity: 12, packed: true },
@@ -7,11 +9,13 @@ const initialItems = [
 ];
 
 export default function App() {
+  const [packingList, setPackingList] = useState(initialItems);
+
   return (
     <div className="app">
       <Logo />
-      <Form />
-      <PackingList />
+      <Form setPackingList={setPackingList} />
+      <PackingList packingList={packingList} setPackingList={setPackingList} />
       <Stats />
     </div>
   );
@@ -21,16 +25,36 @@ function Logo() {
   return <h1>🏝️ Far Away 💼</h1>;
 }
 
-function Form() {
+function Form({ packingList, setPackingList }) {
+  const [description, setDescription] = useState("");
+  const [quantity, setQuantity] = useState(1);
+
   function handleSubmit(e) {
     e.preventDefault(); // Prevents page reloading upon form submission.
+    if (!description) return; // Prevents users submitting a blank item
+
+    const newItem = {
+      description: description.trim(),
+      quantity,
+      packed: false,
+      id: Date.now(),
+    };
+    console.log(newItem);
+
+    // Reset states back to initial values
+    setDescription("");
+    setQuantity(1);
+    setPackingList((l) => [...l, newItem]);
   }
 
   return (
     // When handling a form submit, we use onSubmit within the form element to pass through a handle function.
     <form className="add-form" onSubmit={handleSubmit}>
       <h3>What do you need for your 😍 trip?</h3>
-      <select>
+      <select
+        value={quantity}
+        onChange={(e) => setQuantity(Number(e.target.value))} // We need the Number() function here, else when we change the quantity value, it will return a string.
+      >
         {/*
           Using the Array.from() function allows us to create an array of specified length, incremented by
           a specified value each time (here it is 1 to 20). We can then map over this array in order to use
@@ -42,31 +66,49 @@ function Form() {
           </option>
         ))}
       </select>
-      <input type="text" placeholder="Item..." />
+      {/*
+        When we set the value of the input as the description state, it will not let the user
+        override the the contents of the input box. This is because the value of the state is 
+        not changing, and React is causing the value of the input box to always be the value of
+        the state. Therefore, by ensuring that upon a change within this input box, the state is
+        also updated to reflect the change, both the state and the value within the input box can
+        be update upon the user typing within the box.
+      */}
+      <input
+        type="text"
+        placeholder="Item..."
+        value={description}
+        onChange={(e) => setDescription(e.target.value.trimStart())}
+      />
       <button>Add</button>
     </form>
   );
 }
 
-function PackingList() {
+function PackingList({ packingList, setPackingList }) {
+  console.log(packingList);
   return (
     <div className="list">
       <ul className="list">
-        {initialItems.map((item) => (
-          <Item item={item} key={item.id} />
+        {packingList.map((item) => (
+          <Item item={item} key={item.id} setPackingList={setPackingList} />
         ))}
       </ul>
     </div>
   );
 }
 
-function Item({ item }) {
+function Item({ item, setPackingList }) {
+  function handleDelete() {
+    setPackingList((l) => l.filter((listItem) => listItem.id !== item.id));
+  }
+
   return (
     <li>
       <span style={item.packed ? { textDecoration: "line-through" } : {}}>
         {item.quantity} {item.description}
       </span>
-      <button>❌</button>
+      <button onClick={handleDelete}>❌</button>
     </li>
   );
 }
