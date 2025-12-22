@@ -1,3 +1,5 @@
+// Emojis can be used with windows shortcut: windows + .
+
 const initialItems = [
   { id: 1, description: "Passports", quantity: 2, packed: false },
   { id: 2, description: "Socks", quantity: 12, packed: true },
@@ -20,10 +22,29 @@ function Logo() {
 }
 
 function Form() {
+  function handleSubmit(e) {
+    e.preventDefault(); // Prevents page reloading upon form submition.
+  }
+
   return (
-    <div className="add-form">
+    // When handling a form submit, we use onSubmit within the form element to pass through a handle function.
+    <form className="add-form" onSubmit={handleSubmit}>
       <h3>What do you need for your 😍 trip?</h3>
-    </div>
+      <select>
+        {/*
+          Using the Array.from() function allows us to create an array of specified length, incremented by
+          a specified value each time (here it is 1 to 20). We can then map over this array in order to use
+          the numbers, in this case as options within a dropdown element.
+        */}
+        {Array.from({ length: 20 }, (_, i) => i + 1).map((num) => (
+          <option value={num} key={num}>
+            {num}
+          </option>
+        ))}
+      </select>
+      <input type="text" placeholder="Item..." />
+      <button>Add</button>
+    </form>
   );
 }
 
@@ -32,7 +53,7 @@ function PackingList() {
     <div className="list">
       <ul className="list">
         {initialItems.map((item) => (
-          <Item item={item} />
+          <Item item={item} key={item.id} />
         ))}
       </ul>
     </div>
