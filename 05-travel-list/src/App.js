@@ -9,13 +9,17 @@ const initialItems = [
 ];
 
 export default function App() {
-  const [packingList, setPackingList] = useState(initialItems);
+  const [items, setItems] = useState([]); //Needed both in Form and packingList components, and so has been brought up to the common parent component.
+
+  function handleAddItems(item) {
+    setItems((items) => [...items, item]); //Since we are setting the new value based on the old value, we need to use a callback function to create a new array by spreading the values of the original.
+  }
 
   return (
     <div className="app">
       <Logo />
-      <Form setPackingList={setPackingList} />
-      <PackingList packingList={packingList} setPackingList={setPackingList} />
+      <Form onAddItems={handleAddItems} />
+      <PackingList items={items} />
       <Stats />
     </div>
   );
@@ -25,7 +29,7 @@ function Logo() {
   return <h1>🏝️ Far Away 💼</h1>;
 }
 
-function Form({ packingList, setPackingList }) {
+function Form({ onAddItems }) {
   const [description, setDescription] = useState("");
   const [quantity, setQuantity] = useState(1);
 
@@ -34,17 +38,18 @@ function Form({ packingList, setPackingList }) {
     if (!description) return; // Prevents users submitting a blank item
 
     const newItem = {
-      description: description.trim(),
+      description,
       quantity,
       packed: false,
       id: Date.now(),
     };
     console.log(newItem);
 
+    onAddItems(newItem);
+
     // Reset states back to initial values
     setDescription("");
     setQuantity(1);
-    setPackingList((l) => [...l, newItem]);
   }
 
   return (
@@ -85,30 +90,25 @@ function Form({ packingList, setPackingList }) {
   );
 }
 
-function PackingList({ packingList, setPackingList }) {
-  console.log(packingList);
+function PackingList({ items }) {
   return (
     <div className="list">
       <ul className="list">
-        {packingList.map((item) => (
-          <Item item={item} key={item.id} setPackingList={setPackingList} />
+        {items.map((item) => (
+          <Item item={item} key={item.id} />
         ))}
       </ul>
     </div>
   );
 }
 
-function Item({ item, setPackingList }) {
-  function handleDelete() {
-    setPackingList((l) => l.filter((listItem) => listItem.id !== item.id));
-  }
-
+function Item({ item }) {
   return (
     <li>
       <span style={item.packed ? { textDecoration: "line-through" } : {}}>
         {item.quantity} {item.description}
       </span>
-      <button onClick={handleDelete}>❌</button>
+      <button>❌</button>
     </li>
   );
 }
