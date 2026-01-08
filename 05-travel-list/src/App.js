@@ -2,12 +2,6 @@
 
 import { useState } from "react";
 
-const initialItems = [
-  { id: 1, description: "Passports", quantity: 2, packed: false },
-  { id: 2, description: "Socks", quantity: 12, packed: true },
-  { id: 3, description: "Charger", quantity: 1, packed: false },
-];
-
 export default function App() {
   const [items, setItems] = useState([]); //Needed both in Form and packingList components, and so has been brought up to the common parent component.
 
@@ -15,11 +9,15 @@ export default function App() {
     setItems((items) => [...items, item]); //Since we are setting the new value based on the old value, we need to use a callback function to create a new array by spreading the values of the original.
   }
 
+  function handleDeleteItems(id) {
+    setItems((items) => items.filter((item) => item.id !== id)); //Sets the items array as a new array by filtering out the item with the id passed through the function.
+  }
+
   return (
     <div className="app">
       <Logo />
-      <Form onAddItems={handleAddItems} />
-      <PackingList items={items} />
+      <Form onAddItem={handleAddItems} />
+      <PackingList items={items} onDeleteItem={handleDeleteItems} />
       <Stats />
     </div>
   );
@@ -29,7 +27,7 @@ function Logo() {
   return <h1>🏝️ Far Away 💼</h1>;
 }
 
-function Form({ onAddItems }) {
+function Form({ onAddItem }) {
   const [description, setDescription] = useState("");
   const [quantity, setQuantity] = useState(1);
 
@@ -43,9 +41,8 @@ function Form({ onAddItems }) {
       packed: false,
       id: Date.now(),
     };
-    console.log(newItem);
 
-    onAddItems(newItem);
+    onAddItem(newItem);
 
     // Reset states back to initial values
     setDescription("");
@@ -90,25 +87,26 @@ function Form({ onAddItems }) {
   );
 }
 
-function PackingList({ items }) {
+function PackingList({ items, onDeleteItem }) {
   return (
     <div className="list">
       <ul className="list">
         {items.map((item) => (
-          <Item item={item} key={item.id} />
+          <Item item={item} onDeleteItem={onDeleteItem} key={item.id} />
         ))}
       </ul>
     </div>
   );
 }
 
-function Item({ item }) {
+function Item({ item, onDeleteItem }) {
   return (
     <li>
       <span style={item.packed ? { textDecoration: "line-through" } : {}}>
         {item.quantity} {item.description}
       </span>
-      <button>❌</button>
+      <button onClick={() => onDeleteItem(item.id)}>❌</button>{" "}
+      {/*Must remember to have onDeleteItem() as a callback function, else it will call instantly */}
     </li>
   );
 }
